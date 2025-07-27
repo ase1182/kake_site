@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <title>描け！公式サイト</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ▼ スタイル ここから ▼ -->
   <style>
-    /* ベース */
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:"Segoe UI",sans-serif;background:#f9f9f9;color:#333}
     header{background:linear-gradient(135deg,#ff6ec4,#7873f5);color:#fff;text-align:center;padding:2rem 1rem}
@@ -19,136 +16,188 @@
     a{color:#ff6ec4;font-weight:bold;text-decoration:none}
     footer{background:#eee;text-align:center;font-size:.9rem;padding:1rem;color:#666}
 
-    /* 描画キャンバス */
-    #drawCanvas{
-      position:fixed;       /* 画面に重ねる */
-      top:0;left:0;
-      width:100vw;height:100vh;
-      touch-action:none;    /* 2本指ズームを無効化 */
-      z-index:9990;         /* コンテンツの上 */
-      pointer-events:auto;  /* 描画を受け付ける */
+    canvas{
+      position:fixed;
+      top:0;left:0;width:100vw;height:100vh;
+      touch-action:none;
+      z-index:9990;
     }
 
-    /* ツールバー */
     #toolbox{
-      position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
-      background:#ffffffee;border-radius:40px;box-shadow:0 2px 6px rgba(0,0,0,.2);
-      display:flex;gap:.8rem;padding:.6rem 1rem;z-index:9991
+      position:fixed;
+      bottom:1rem;
+      left:50%;
+      transform:translateX(-50%);
+      background:#ffffffee;
+      border-radius:1rem;
+      box-shadow:0 2px 6px rgba(0,0,0,.2);
+      display:flex;
+      flex-wrap:wrap;
+      gap:.6rem;
+      padding:.6rem 1rem;
+      z-index:9991;
+      justify-content:center;
+      align-items:center;
     }
+
     #toolbox button{
-      border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;
-      display:flex;align-items:center;justify-content:center;
-      background:#eee;color:#333;cursor:pointer
+      border:none;
+      border-radius:50%;
+      width:40px;
+      height:40px;
+      font-size:1.2rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#eee;
+      color:#333;
+      cursor:pointer;
     }
+
     #toolbox button.active{background:#ff6ec4;color:#fff}
+
+    #toolbox input[type="color"],
+    #toolbox input[type="range"] {
+      height:30px;
+    }
+    #toolbox label {
+      font-size:0.75rem;
+      text-align:center;
+      color:#666;
+    }
   </style>
-  <!-- ▲ スタイル ここまで ▲ -->
 </head>
 <body>
 
-  <header>
-    <!-- 好きなロゴ画像を置く -->
-    <img src="images/logo.png" alt="描け！ロゴ">
-    <h1>描け！</h1>
-    <p>みんなで描く、みんなのアート</p>
-  </header>
+<header>
+  <img src="images/logo.png" alt="描け！ロゴ">
+  <h1>描け！</h1>
+  <p>みんなで描く、みんなのアート</p>
+</header>
 
-  <main>
-    <section>
-      <h2>この企画について</h2>
-      <p>
-        「描け！」は、来場者全員が自由にペンや絵の具で描きこめる参加型アート体験企画です。<br>
-        子どもから大人まで、誰でも参加OK！完成はその日その場でのお楽しみ！
-      </p>
-    </section>
+<main>
+  <section>
+    <h2>この企画について</h2>
+    <p>「描け！」は、来場者全員が自由にペンや絵の具で描きこめる参加型アート体験企画です。<br>
+    子どもから大人まで、誰でも参加OK！完成はその日その場でのお楽しみ！</p>
+  </section>
 
-    <section>
-      <h2>日時・場所</h2>
-      <p>2025年◯月◯日（日）<br>◯◯大学 学園祭 ◯号館前スペース</p>
-    </section>
+  <section>
+    <h2>日時・場所</h2>
+    <p>2025年◯月◯日（日）<br>◯◯大学 学園祭 ◯号館前スペース</p>
+  </section>
 
-    <section>
-      <h2>参加方法</h2>
-      <p>手ぶらでOK！その場にある画材を自由に使って描くだけ。途中参加・途中退場も大歓迎です。</p>
-    </section>
+  <section>
+    <h2>参加方法</h2>
+    <p>手ぶらでOK！その場にある画材を自由に使って描くだけ。途中参加・途中退場も大歓迎です。</p>
+  </section>
 
-    <section>
-      <h2>SNSでシェアしよう</h2>
-      <p>ハッシュタグ <strong>#描けフェス</strong> をつけて投稿しよう！<br>
-      <a href="https://twitter.com/your_account" target="_blank">公式Xはこちら</a></p>
-    </section>
-  </main>
+  <section>
+    <h2>SNSでシェアしよう</h2>
+    <p>ハッシュタグ <strong>#描けフェス</strong> をつけて投稿しよう！<br>
+    <a href="https://twitter.com/your_account" target="_blank">公式Xはこちら</a></p>
+  </section>
+</main>
 
-  <footer><small>© 2025 描け！公式企画</small></footer>
+<footer><small>© 2025 描け！公式企画</small></footer>
 
-  <!-- ▼ 描画キャンバスとツールバー ▼ -->
-  <canvas id="drawCanvas"></canvas>
+<canvas id="drawCanvas"></canvas>
 
-  <div id="toolbox">
-    <button id="penBtn"   title="ペン">✏️</button>
-    <button id="eraserBtn" title="消しゴム">🧽</button>
-    <button id="clearBtn"  title="クリア">🗑️</button>
-  </div>
+<div id="toolbox">
+  <button id="penBtn" title="ペン">✏️</button>
+  <button id="eraserBtn" title="消しゴム">🧽</button>
+  <label>
+    <input type="color" id="colorPicker" value="#333333">
+  </label>
+  <label>
+    <input type="range" id="thicknessSlider" min="1" max="30" value="4">
+  </label>
+  <button id="clearBtn" title="全消し">🗑️</button>
+  <button id="saveBtn" title="保存">💾</button>
+</div>
 
-  <!-- ▼ スクリプト ▼ -->
-  <script>
-    const canvas = document.getElementById('drawCanvas');
-    const ctx     = canvas.getContext('2d');
-    let drawing = false, erasing = false, lastX = 0, lastY = 0;
+<script>
+  const canvas = document.getElementById('drawCanvas');
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+  let erasing = false;
+  let lastX = 0, lastY = 0;
+  let color = '#333';
+  let thickness = 4;
 
-    // キャンバスサイズを画面に合わせる
-    const resize = ()=>{ canvas.width = innerWidth; canvas.height = innerHeight; }
-    window.addEventListener('resize',resize); resize();
+  const resizeCanvas = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
-    // ペン・消しゴムの切替
-    const penBtn=document.getElementById('penBtn');
-    const eraserBtn=document.getElementById('eraserBtn');
-    const clearBtn=document.getElementById('clearBtn');
-    const setMode=(erase)=>{
-      erasing=erase;
-      penBtn.classList.toggle('active',!erase);
-      eraserBtn.classList.toggle('active',erase);
-    };
-    penBtn.addEventListener('click',()=>setMode(false));
-    eraserBtn.addEventListener('click',()=>setMode(true));
-    clearBtn.addEventListener('click',()=>{ctx.clearRect(0,0,canvas.width,canvas.height);});
+  const penBtn = document.getElementById('penBtn');
+  const eraserBtn = document.getElementById('eraserBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const colorPicker = document.getElementById('colorPicker');
+  const thicknessSlider = document.getElementById('thicknessSlider');
 
-    setMode(false); // 最初はペン
+  const setMode = (erase) => {
+    erasing = erase;
+    penBtn.classList.toggle('active', !erase);
+    eraserBtn.classList.toggle('active', erase);
+  };
+  penBtn.addEventListener('click', () => setMode(false));
+  eraserBtn.addEventListener('click', () => setMode(true));
+  clearBtn.addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+  saveBtn.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'drawing.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
 
-    // 描画関数
-    const drawLine=(x,y)=>{
-      ctx.lineWidth=erasing? 30:4;
-      ctx.lineCap='round';
-      ctx.strokeStyle=erasing? '#f9f9f9':'#333';
-      ctx.lineTo(x,y);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x,y);
-    };
+  colorPicker.addEventListener('change', (e) => {
+    color = e.target.value;
+  });
+  thicknessSlider.addEventListener('input', (e) => {
+    thickness = parseInt(e.target.value);
+  });
 
-    // タッチ / マウス共用ハンドラ
-    const start=(e)=>{
-      drawing=true;
-      const t=e.touches?e.touches[0]:e;
-      [lastX,lastY]=[t.clientX,t.clientY];
-      ctx.beginPath();
-      ctx.moveTo(lastX,lastY);
-    };
-    const move=(e)=>{
-      if(!drawing)return;
-      e.preventDefault();
-      const t=e.touches?e.touches[0]:e;
-      drawLine(t.clientX,t.clientY);
-    };
-    const end=()=>{drawing=false;ctx.beginPath();};
+  setMode(false);
 
-    canvas.addEventListener('mousedown',start);
-    canvas.addEventListener('touchstart',start);
-    canvas.addEventListener('mousemove',move);
-    canvas.addEventListener('touchmove',move,{passive:false});
-    canvas.addEventListener('mouseup',end);
-    canvas.addEventListener('touchend',end);
-  </script>
-  <!-- ▲ スクリプト終わり ▲ -->
+  const startDrawing = (e) => {
+    drawing = true;
+    const t = e.touches ? e.touches[0] : e;
+    [lastX, lastY] = [t.clientX, t.clientY];
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+  };
+
+  const draw = (e) => {
+    if (!drawing) return;
+    e.preventDefault();
+    const t = e.touches ? e.touches[0] : e;
+    ctx.lineWidth = thickness;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = erasing ? '#f9f9f9' : color;
+    ctx.lineTo(t.clientX, t.clientY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(t.clientX, t.clientY);
+  };
+
+  const stopDrawing = () => {
+    drawing = false;
+    ctx.beginPath();
+  };
+
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('touchstart', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('touchend', stopDrawing);
+</script>
+
 </body>
 </html>
