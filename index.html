@@ -85,7 +85,7 @@
     canvas.width = newWidth;
     canvas.height = newHeight;
 
-    // 古い内容を復元（小さくした場合ははみ出た部分が切れる）
+    // 古い内容を復元
     ctx.putImageData(oldImage, 0, 0);
   }
   window.addEventListener('resize', resizeCanvas);
@@ -119,11 +119,12 @@
   thicknessSlider.addEventListener('input', (e) => { thickness = parseInt(e.target.value); });
   setMode(false);
 
-  // --- 描画イベント ---
+  // --- 位置ズレ解消の座標取得 ---
   const getXY = (e) => {
     const t = e.touches ? e.touches[0] : e;
-    // 描画位置はpageX/pageY（ページ全体の座標）
-    return [t.pageX, t.pageY];
+    const rect = canvas.getBoundingClientRect();
+    // キャンバスの左上からの座標に変換！
+    return [t.clientX - rect.left, t.clientY - rect.top];
   };
 
   const startDrawing = (e) => {
