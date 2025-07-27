@@ -4,10 +4,50 @@
   <meta charset="UTF-8">
   <title>描け！公式サイト</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+
+  <!-- ▼ スタイル ここから ▼ -->
+  <style>
+    /* ベース */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Segoe UI",sans-serif;background:#f9f9f9;color:#333}
+    header{background:linear-gradient(135deg,#ff6ec4,#7873f5);color:#fff;text-align:center;padding:2rem 1rem}
+    header img{max-width:140px;margin-bottom:1rem}
+    h1{font-size:2rem;margin-bottom:.3rem}
+    main{padding:2rem 1rem;max-width:800px;margin:auto}
+    section{background:#fff;border-radius:10px;padding:1.5rem;margin-bottom:2rem;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+    section h2{color:#5a45d5;margin-bottom:.5rem}
+    a{color:#ff6ec4;font-weight:bold;text-decoration:none}
+    footer{background:#eee;text-align:center;font-size:.9rem;padding:1rem;color:#666}
+
+    /* 描画キャンバス */
+    #drawCanvas{
+      position:fixed;       /* 画面に重ねる */
+      top:0;left:0;
+      width:100vw;height:100vh;
+      touch-action:none;    /* 2本指ズームを無効化 */
+      z-index:9990;         /* コンテンツの上 */
+      pointer-events:auto;  /* 描画を受け付ける */
+    }
+
+    /* ツールバー */
+    #toolbox{
+      position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
+      background:#ffffffee;border-radius:40px;box-shadow:0 2px 6px rgba(0,0,0,.2);
+      display:flex;gap:.8rem;padding:.6rem 1rem;z-index:9991
+    }
+    #toolbox button{
+      border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;
+      display:flex;align-items:center;justify-content:center;
+      background:#eee;color:#333;cursor:pointer
+    }
+    #toolbox button.active{background:#ff6ec4;color:#fff}
+  </style>
+  <!-- ▲ スタイル ここまで ▲ -->
 </head>
 <body>
+
   <header>
+    <!-- 好きなロゴ画像を置く -->
     <img src="images/logo.png" alt="描け！ロゴ">
     <h1>描け！</h1>
     <p>みんなで描く、みんなのアート</p>
@@ -17,42 +57,98 @@
     <section>
       <h2>この企画について</h2>
       <p>
-        「描け！」は、来場者全員が自由にペンや絵の具で描きこめる<br>
-        参加型アート体験企画です。<br>
-        子どもから大人まで、誰でも参加OK！<br>
-        完成はその日その場でのお楽しみです。
+        「描け！」は、来場者全員が自由にペンや絵の具で描きこめる参加型アート体験企画です。<br>
+        子どもから大人まで、誰でも参加OK！完成はその日その場でのお楽しみ！
       </p>
     </section>
 
     <section>
       <h2>日時・場所</h2>
-      <p>
-        2025年◯月◯日（日）<br>
-        ◯◯大学 学園祭 ◯号館前スペース
-      </p>
+      <p>2025年◯月◯日（日）<br>◯◯大学 学園祭 ◯号館前スペース</p>
     </section>
 
     <section>
       <h2>参加方法</h2>
-      <p>
-        手ぶらでOK！その場にある画材を自由に使って描くだけ。<br>
-        途中参加・途中退場も大歓迎です。<br>
-        あなたの一筆が、アートを完成に近づけます。
-      </p>
+      <p>手ぶらでOK！その場にある画材を自由に使って描くだけ。途中参加・途中退場も大歓迎です。</p>
     </section>
 
     <section>
       <h2>SNSでシェアしよう</h2>
-      <p>
-        ハッシュタグ <strong>#描けフェス</strong> をつけて作品を投稿しよう！<br>
-        みんなの投稿でオンラインでもアートがつながります。<br>
-        <a href="https://twitter.com/your_account" target="_blank">公式X（旧Twitter）はこちら</a>
-      </p>
+      <p>ハッシュタグ <strong>#描けフェス</strong> をつけて投稿しよう！<br>
+      <a href="https://twitter.com/your_account" target="_blank">公式Xはこちら</a></p>
     </section>
   </main>
 
-  <footer>
-    <small>© 2025 描け！公式企画</small>
-  </footer>
+  <footer><small>© 2025 描け！公式企画</small></footer>
+
+  <!-- ▼ 描画キャンバスとツールバー ▼ -->
+  <canvas id="drawCanvas"></canvas>
+
+  <div id="toolbox">
+    <button id="penBtn"   title="ペン">✏️</button>
+    <button id="eraserBtn" title="消しゴム">🧽</button>
+    <button id="clearBtn"  title="クリア">🗑️</button>
+  </div>
+
+  <!-- ▼ スクリプト ▼ -->
+  <script>
+    const canvas = document.getElementById('drawCanvas');
+    const ctx     = canvas.getContext('2d');
+    let drawing = false, erasing = false, lastX = 0, lastY = 0;
+
+    // キャンバスサイズを画面に合わせる
+    const resize = ()=>{ canvas.width = innerWidth; canvas.height = innerHeight; }
+    window.addEventListener('resize',resize); resize();
+
+    // ペン・消しゴムの切替
+    const penBtn=document.getElementById('penBtn');
+    const eraserBtn=document.getElementById('eraserBtn');
+    const clearBtn=document.getElementById('clearBtn');
+    const setMode=(erase)=>{
+      erasing=erase;
+      penBtn.classList.toggle('active',!erase);
+      eraserBtn.classList.toggle('active',erase);
+    };
+    penBtn.addEventListener('click',()=>setMode(false));
+    eraserBtn.addEventListener('click',()=>setMode(true));
+    clearBtn.addEventListener('click',()=>{ctx.clearRect(0,0,canvas.width,canvas.height);});
+
+    setMode(false); // 最初はペン
+
+    // 描画関数
+    const drawLine=(x,y)=>{
+      ctx.lineWidth=erasing? 30:4;
+      ctx.lineCap='round';
+      ctx.strokeStyle=erasing? '#f9f9f9':'#333';
+      ctx.lineTo(x,y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+    };
+
+    // タッチ / マウス共用ハンドラ
+    const start=(e)=>{
+      drawing=true;
+      const t=e.touches?e.touches[0]:e;
+      [lastX,lastY]=[t.clientX,t.clientY];
+      ctx.beginPath();
+      ctx.moveTo(lastX,lastY);
+    };
+    const move=(e)=>{
+      if(!drawing)return;
+      e.preventDefault();
+      const t=e.touches?e.touches[0]:e;
+      drawLine(t.clientX,t.clientY);
+    };
+    const end=()=>{drawing=false;ctx.beginPath();};
+
+    canvas.addEventListener('mousedown',start);
+    canvas.addEventListener('touchstart',start);
+    canvas.addEventListener('mousemove',move);
+    canvas.addEventListener('touchmove',move,{passive:false});
+    canvas.addEventListener('mouseup',end);
+    canvas.addEventListener('touchend',end);
+  </script>
+  <!-- ▲ スクリプト終わり ▲ -->
 </body>
 </html>
