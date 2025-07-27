@@ -72,11 +72,21 @@
   let color = '#333';
   let thickness = 4;
 
-  // ページ全体に追従するcanvasサイズ
+  // --- resize時に内容を保持 ---
   function resizeCanvas() {
-    // キャンバスの大きさをページ全体（スクロール分含む）に合わせる
-    canvas.width  = Math.max(document.documentElement.scrollWidth,  document.documentElement.clientWidth,  window.innerWidth || 0);
-    canvas.height = Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight, window.innerHeight || 0);
+    // 現在の内容を一時保存
+    const oldImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    // 新しいサイズを取得
+    const newWidth  = Math.max(document.documentElement.scrollWidth,  document.documentElement.clientWidth,  window.innerWidth || 0);
+    const newHeight = Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight, window.innerHeight || 0);
+
+    // サイズ変更
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    // 古い内容を復元（小さくした場合ははみ出た部分が切れる）
+    ctx.putImageData(oldImage, 0, 0);
   }
   window.addEventListener('resize', resizeCanvas);
   window.addEventListener('scroll', resizeCanvas); // ページが動的に伸びた時も
@@ -112,7 +122,7 @@
   // --- 描画イベント ---
   const getXY = (e) => {
     const t = e.touches ? e.touches[0] : e;
-    // 描画位置はpageX/pageY（ページ全体の座標！）
+    // 描画位置はpageX/pageY（ページ全体の座標）
     return [t.pageX, t.pageY];
   };
 
