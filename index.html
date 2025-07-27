@@ -5,24 +5,11 @@
   <title>描け！公式サイト</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:"Segoe UI",sans-serif;background:#f9f9f9;color:#333}
-    header{background:linear-gradient(135deg,#ff6ec4,#7873f5);color:#fff;text-align:center;padding:2rem 1rem}
-    header img{max-width:140px;margin-bottom:1rem}
-    h1{font-size:2rem;margin-bottom:.3rem}
-    main{padding:2rem 1rem;max-width:800px;margin:auto}
-    section{background:#fff;border-radius:10px;padding:1.5rem;margin-bottom:2rem;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-    section h2{color:#5a45d5;margin-bottom:.5rem}
-    a{color:#ff6ec4;font-weight:bold;text-decoration:none}
-    footer{background:#eee;text-align:center;font-size:.9rem;padding:1rem;color:#666}
-    #drawCanvas{
-      position:absolute;
-      top:0; left:0;
-      width:100vw;
-      height:100vh;
-      pointer-events:auto;
-      touch-action:none;
-      z-index:9990;
+    html,body { height: 100%; margin: 0; padding: 0; }
+    body { font-family:"Segoe UI",sans-serif; background:#f9f9f9; color:#333; height:100vh; }
+    #drawCanvas {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 9990; pointer-events: auto; touch-action: none;
     }
     #toolbox{
       position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
@@ -33,27 +20,32 @@
     #toolbox button.active{background:#ff6ec4;color:#fff}
     #toolbox input[type="color"],#toolbox input[type="range"]{height:30px;}
     #toolbox label{font-size:0.75rem;text-align:center;color:#666;}
+    header,main,footer{pointer-events: none;}
+    #toolbox, #drawCanvas { pointer-events: auto;}
+    header{background:linear-gradient(135deg,#ff6ec4,#7873f5);color:#fff;text-align:center;padding:2rem 1rem}
+    header img{max-width:140px;margin-bottom:1rem}
+    h1{font-size:2rem;margin-bottom:.3rem}
+    main{padding:2rem 1rem;max-width:800px;margin:auto}
+    section{background:#fff;border-radius:10px;padding:1.5rem;margin-bottom:2rem;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+    section h2{color:#5a45d5;margin-bottom:.5rem}
+    a{color:#ff6ec4;font-weight:bold;text-decoration:none}
+    footer{background:#eee;text-align:center;font-size:.9rem;padding:1rem;color:#666}
   </style>
 </head>
 <body>
-
 <header>
   <img src="images/logo.png" alt="描け！ロゴ">
   <h1>描け！</h1>
   <p>みんなで描く、みんなのアート</p>
 </header>
-
 <main>
   <section><h2>この企画について</h2><p>「描け！」は、来場者全員が自由にペンや絵の具で描きこめる参加型アート体験企画です。</p></section>
   <section><h2>日時・場所</h2><p>2025年◯月◯日（日）<br>◯◯大学 学園祭 ◯号館前スペース</p></section>
   <section><h2>参加方法</h2><p>手ぶらでOK！画材も用意しています。途中参加・途中退場も大歓迎！</p></section>
   <section><h2>SNSでシェアしよう</h2><p>#描けフェス をつけてXに投稿しよう！<br><a href="https://twitter.com/your_account" target="_blank">公式X</a></p></section>
 </main>
-
 <footer><small>© 2025 描け！公式企画</small></footer>
-
 <canvas id="drawCanvas"></canvas>
-
 <div id="toolbox">
   <button id="penBtn" title="ペン">✏️</button>
   <button id="eraserBtn" title="消しゴム">🧽</button>
@@ -62,7 +54,6 @@
   <button id="clearBtn" title="全消し">🗑️</button>
   <button id="saveBtn" title="保存">💾</button>
 </div>
-
 <script>
   const canvas = document.getElementById('drawCanvas');
   const ctx = canvas.getContext('2d');
@@ -72,24 +63,23 @@
   let color = '#333';
   let thickness = 4;
 
-  // --- resize時に内容を保持 ---
   function resizeCanvas() {
+    // 高DPI対応
+    const dpr = window.devicePixelRatio || 1;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
     // 現在の内容を一時保存
     const oldImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    // 新しいサイズを取得
-    const newWidth  = Math.max(document.documentElement.scrollWidth,  document.documentElement.clientWidth,  window.innerWidth || 0);
-    const newHeight = Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight, window.innerHeight || 0);
-
-    // サイズ変更
-    canvas.width = newWidth;
-    canvas.height = newHeight;
-
-    // 古い内容を復元
-    ctx.putImageData(oldImage, 0, 0);
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(dpr, dpr);
+    // 古い内容を復元（ただしwindowの大きさが変わった時のみ部分的に復元されます）
+    try { ctx.putImageData(oldImage, 0, 0); } catch(e){}
   }
   window.addEventListener('resize', resizeCanvas);
-  window.addEventListener('scroll', resizeCanvas); // ページが動的に伸びた時も
   resizeCanvas();
 
   const penBtn = document.getElementById('penBtn');
@@ -119,12 +109,11 @@
   thicknessSlider.addEventListener('input', (e) => { thickness = parseInt(e.target.value); });
   setMode(false);
 
-  // --- 位置ズレ解消の座標取得 ---
+  // 位置ズレ解消の座標取得
   const getXY = (e) => {
     const t = e.touches ? e.touches[0] : e;
     const rect = canvas.getBoundingClientRect();
-    // キャンバスの左上からの座標に変換！
-    return [t.clientX - rect.left, t.clientY - rect.top];
+    return [ (t.clientX - rect.left), (t.clientY - rect.top) ];
   };
 
   const startDrawing = (e) => {
@@ -133,7 +122,6 @@
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
   };
-
   const draw = (e) => {
     if (!drawing) return;
     e.preventDefault();
@@ -147,7 +135,6 @@
     ctx.beginPath();
     ctx.moveTo(x, y);
   };
-
   const stopDrawing = () => {
     drawing = false;
     ctx.beginPath();
@@ -160,6 +147,5 @@
   canvas.addEventListener('mouseup', stopDrawing);
   canvas.addEventListener('touchend', stopDrawing);
 </script>
-
 </body>
 </html>
