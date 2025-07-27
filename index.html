@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html,body { height: 100%; margin: 0; padding: 0; }
-    body { font-family:"Segoe UI",sans-serif; background:#f9f9f9; color:#333; height:100vh; }
+    body { font-family:"Segoe UI",sans-serif; background:#f9f9f9; color:#333;}
     #drawCanvas {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      position: absolute; top: 0; left: 0;
+      width: 100vw; height: 100vh;
       z-index: 9990; pointer-events: auto; touch-action: none;
     }
     #toolbox{
@@ -63,23 +64,29 @@
   let color = '#333';
   let thickness = 4;
 
+  // --- ページ全体でズレなく描く＆内容保持 ---
   function resizeCanvas() {
-    // 高DPI対応
+    // 現在の内容を保存
+    const oldWidth = canvas.width;
+    const oldHeight = canvas.height;
+    const oldImage = ctx.getImageData(0, 0, oldWidth, oldHeight);
+
+    // ページ全体サイズにcanvasを変更
     const dpr = window.devicePixelRatio || 1;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    // 現在の内容を一時保存
-    const oldImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
+    const newWidth = Math.max(document.documentElement.scrollWidth, window.innerWidth) * dpr;
+    const newHeight = Math.max(document.documentElement.scrollHeight, window.innerHeight) * dpr;
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+    canvas.style.width = (newWidth / dpr) + "px";
+    canvas.style.height = (newHeight / dpr) + "px";
     ctx.setTransform(1,0,0,1,0,0);
     ctx.scale(dpr, dpr);
-    // 古い内容を復元（ただしwindowの大きさが変わった時のみ部分的に復元されます）
+
+    // 古い内容を復元（範囲内のみ）
     try { ctx.putImageData(oldImage, 0, 0); } catch(e){}
   }
   window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('scroll', resizeCanvas); // ページが動的に伸びた時も
   resizeCanvas();
 
   const penBtn = document.getElementById('penBtn');
@@ -109,11 +116,15 @@
   thicknessSlider.addEventListener('input', (e) => { thickness = parseInt(e.target.value); });
   setMode(false);
 
-  // 位置ズレ解消の座標取得
+  // --- ページ全体座標でズレなく描画 ---
   const getXY = (e) => {
     const t = e.touches ? e.touches[0] : e;
-    const rect = canvas.getBoundingClientRect();
-    return [ (t.clientX - rect.left), (t.clientY - rect.top) ];
+    // ページ内の座標取得（ページ全体のスクロールを含む座標！）
+    const dpr = window.devicePixelRatio || 1;
+    return [
+      (t.pageX) * dpr,
+      (t.pageY) * dpr
+    ];
   };
 
   const startDrawing = (e) => {
