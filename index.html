@@ -15,56 +15,16 @@
     section h2{color:#5a45d5;margin-bottom:.5rem}
     a{color:#ff6ec4;font-weight:bold;text-decoration:none}
     footer{background:#eee;text-align:center;font-size:.9rem;padding:1rem;color:#666}
-
-    canvas{
-      position:fixed;
-      top:0;left:0;width:100vw;height:100vh;
-      touch-action:none;
-      z-index:9990;
-    }
-
-    #toolbox{
-      position:fixed;
-      bottom:1rem;
-      left:50%;
-      transform:translateX(-50%);
-      background:#ffffffee;
-      border-radius:1rem;
-      box-shadow:0 2px 6px rgba(0,0,0,.2);
-      display:flex;
-      flex-wrap:wrap;
-      gap:.6rem;
-      padding:.6rem 1rem;
-      z-index:9991;
-      justify-content:center;
-      align-items:center;
-    }
-
-    #toolbox button{
-      border:none;
-      border-radius:50%;
-      width:40px;
-      height:40px;
-      font-size:1.2rem;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#eee;
-      color:#333;
-      cursor:pointer;
-    }
-
+    canvas{position:fixed;top:0;left:0;width:100vw;height:100vh;touch-action:none;z-index:9990;}
+    #toolbox{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
+      background:#ffffffee;border-radius:1rem;box-shadow:0 2px 6px rgba(0,0,0,.2);
+      display:flex;flex-wrap:wrap;gap:.6rem;padding:.6rem 1rem;z-index:9991;
+      justify-content:center;align-items:center;}
+    #toolbox button{border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;
+      display:flex;align-items:center;justify-content:center;background:#eee;color:#333;cursor:pointer;}
     #toolbox button.active{background:#ff6ec4;color:#fff}
-
-    #toolbox input[type="color"],
-    #toolbox input[type="range"] {
-      height:30px;
-    }
-    #toolbox label {
-      font-size:0.75rem;
-      text-align:center;
-      color:#666;
-    }
+    #toolbox input[type="color"],#toolbox input[type="range"]{height:30px;}
+    #toolbox label{font-size:0.75rem;text-align:center;color:#666;}
   </style>
 </head>
 <body>
@@ -76,27 +36,10 @@
 </header>
 
 <main>
-  <section>
-    <h2>この企画について</h2>
-    <p>「描け！」は、来場者全員が自由にペンや絵の具で描きこめる参加型アート体験企画です。<br>
-    子どもから大人まで、誰でも参加OK！完成はその日その場でのお楽しみ！</p>
-  </section>
-
-  <section>
-    <h2>日時・場所</h2>
-    <p>2025年◯月◯日（日）<br>◯◯大学 学園祭 ◯号館前スペース</p>
-  </section>
-
-  <section>
-    <h2>参加方法</h2>
-    <p>手ぶらでOK！その場にある画材を自由に使って描くだけ。途中参加・途中退場も大歓迎です。</p>
-  </section>
-
-  <section>
-    <h2>SNSでシェアしよう</h2>
-    <p>ハッシュタグ <strong>#描けフェス</strong> をつけて投稿しよう！<br>
-    <a href="https://twitter.com/your_account" target="_blank">公式Xはこちら</a></p>
-  </section>
+  <section><h2>この企画について</h2><p>「描け！」は、来場者全員が自由にペンや絵の具で描きこめる参加型アート体験企画です。</p></section>
+  <section><h2>日時・場所</h2><p>2025年◯月◯日（日）<br>◯◯大学 学園祭 ◯号館前スペース</p></section>
+  <section><h2>参加方法</h2><p>手ぶらでOK！画材も用意しています。途中参加・途中退場も大歓迎！</p></section>
+  <section><h2>SNSでシェアしよう</h2><p>#描けフェス をつけてXに投稿しよう！<br><a href="https://twitter.com/your_account" target="_blank">公式X</a></p></section>
 </main>
 
 <footer><small>© 2025 描け！公式企画</small></footer>
@@ -106,12 +49,8 @@
 <div id="toolbox">
   <button id="penBtn" title="ペン">✏️</button>
   <button id="eraserBtn" title="消しゴム">🧽</button>
-  <label>
-    <input type="color" id="colorPicker" value="#333333">
-  </label>
-  <label>
-    <input type="range" id="thicknessSlider" min="1" max="30" value="4">
-  </label>
+  <label><input type="color" id="colorPicker" value="#333333"></label>
+  <label><input type="range" id="thicknessSlider" min="1" max="30" value="4"></label>
   <button id="clearBtn" title="全消し">🗑️</button>
   <button id="saveBtn" title="保存">💾</button>
 </div>
@@ -155,14 +94,8 @@
     link.href = canvas.toDataURL();
     link.click();
   });
-
-  colorPicker.addEventListener('change', (e) => {
-    color = e.target.value;
-  });
-  thicknessSlider.addEventListener('input', (e) => {
-    thickness = parseInt(e.target.value);
-  });
-
+  colorPicker.addEventListener('change', (e) => { color = e.target.value; });
+  thicknessSlider.addEventListener('input', (e) => { thickness = parseInt(e.target.value); });
   setMode(false);
 
   const startDrawing = (e) => {
@@ -179,7 +112,8 @@
     const t = e.touches ? e.touches[0] : e;
     ctx.lineWidth = thickness;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = erasing ? '#f9f9f9' : color;
+    ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+    ctx.strokeStyle = erasing ? 'rgba(0,0,0,1)' : color;
     ctx.lineTo(t.clientX, t.clientY);
     ctx.stroke();
     ctx.beginPath();
